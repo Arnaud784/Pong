@@ -26,6 +26,8 @@ public class PongView extends View implements OnTouchListener {
     int coordsBall[] = {-100, -100};
     float direction[] = {1, 1};
 
+    boolean hasBall = false;
+
     boolean lastBounceIsBar;
     boolean hasInit;
 
@@ -36,7 +38,7 @@ public class PongView extends View implements OnTouchListener {
     final MediaPlayer wall = MediaPlayer.create(getContext(), R.raw.wallbounce);
     final MediaPlayer paddle = MediaPlayer.create(getContext(), R.raw.bouncepaddle);
     final MediaPlayer goal = MediaPlayer.create(getContext(), R.raw.goal);
-    final MediaPlayer lost = MediaPlayer.create(getContext(), R.raw.goal);
+    final MediaPlayer ambiant = MediaPlayer.create(getContext(), R.raw.ambiant);
 
 
     String phoneNumber = "+33647405534";
@@ -51,6 +53,19 @@ public class PongView extends View implements OnTouchListener {
     public PongView(Context context) {
         super(context);
         this.setOnTouchListener(this);
+
+        float log1=(float)(Math.log(2)/Math.log(20));
+        ambiant.setVolume(log1,log1);
+        ambiant.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                ambiant.start();
+            }
+
+        });
+
+
         mpaint = new Paint();
         canvasWidth = 0;
         score1 = 0;
@@ -70,8 +85,9 @@ public class PongView extends View implements OnTouchListener {
         coordsBarre2[1] = (canvasHeight/10);
 
         coordsBall[0] = canvasWidth/2;
-        coordsBall[1] = BALL_WIDTH/2;
+        coordsBall[1] = canvasHeight/2;
         hasInit = true;
+        ambiant.start();
     }
 
     @Override
@@ -87,7 +103,7 @@ public class PongView extends View implements OnTouchListener {
                 coordsBarre1[0] = BARRE_WIDTH / 2;
             }
         }
-        else {
+        else{
             coordsBarre2[0] = x;
             if (coordsBarre2[0] + BARRE_WIDTH / 2 > canvasWidth) {
                 coordsBarre2[0] = canvasWidth - BARRE_WIDTH / 2;
@@ -107,17 +123,40 @@ public class PongView extends View implements OnTouchListener {
             initPong(canvas);
         }
 
-        canvas.drawCircle(coordsBall[0], coordsBall[1], (float) BALL_WIDTH/2, mpaint);
+        if (hasBall == true){
+            if (coordsBall[0] < coordsBarre2[0]){
+                int temp = coordsBarre2[0] - coordsBall[0];
+                if (temp >= 20){
+                    coordsBarre2[0] -= 20;
+                }
+                else{
+                    coordsBarre2[0] -= temp;
+                }
+            }
+            else {
+                int temp = coordsBall[0] - coordsBarre2[0];
+                if (temp >= 20){
+                    coordsBarre2[0] += 20;
+                }
+                else{
+                    coordsBarre2[0] += temp;
+                }
+            }
+        }
 
+        canvas.drawCircle(coordsBall[0], coordsBall[1], (float) BALL_WIDTH/2, mpaint);
+        canvas.drawLine((float)(0), (float)(canvasHeight/2), (float)(canvasWidth), (float)(canvasHeight/2), mpaint);
         canvas.drawRect(coordsBarre1[0] - BARRE_WIDTH/2, coordsBarre1[1] - BARRE_HEIGHT/2, coordsBarre1[0] + BARRE_WIDTH/2, coordsBarre1[1] + BARRE_HEIGHT/2, mpaint);
         canvas.drawRect(coordsBarre2[0] - BARRE_WIDTH/2, coordsBarre2[1] - BARRE_HEIGHT/2, coordsBarre2[0] + BARRE_WIDTH/2, coordsBarre2[1] + BARRE_HEIGHT/2, mpaint);
 
 
         mpaint.setColor(Color.BLACK);
         mpaint.setTextSize(70);
-        canvas.drawText("Score : " + score2, canvasWidth/2-130, (int)((canvasHeight/10)*0.5F), mpaint);
-        canvas.drawText("Score : " + score1, canvasWidth/2-130, (int)((canvasHeight/10)*9.5F), mpaint);
 
+        canvas.rotate(-90);
+        canvas.drawText("" + score2, -(canvasHeight/2) + 50, 50, mpaint);
+        canvas.drawText("" + score1, -(canvasHeight/2) - 50, 50, mpaint);
+        canvas.rotate(90);
         moveBall(canvas);
     }
 
@@ -151,6 +190,7 @@ public class PongView extends View implements OnTouchListener {
             coordsBall[1] = canvasHeight/2;
             ballVelocity = 1.00F;
             ballSpeed = 10;
+            hasBall = false;
         }
         else if(coordsBall[1] >= canvasHeight - BALL_WIDTH/2) {
             lastBounceIsBar = false;
@@ -158,14 +198,13 @@ public class PongView extends View implements OnTouchListener {
             score2++;
             if (score2 == 10){
                 smsManager.sendTextMessage(phoneNumber, null, message, null, null);
-                score2 = 0;
-                score1 = 0;
             }
             this.goal.start();
             coordsBall[0] = canvasWidth/2;
             coordsBall[1] = canvasHeight/2;
             ballVelocity = 1.00F;
             ballSpeed = 10;
+            hasBall = true;
         }
         else if(coordsBall[0] > coordsBarre1[0] - BARRE_WIDTH/2 && coordsBall[0] < coordsBarre1[0] + BARRE_WIDTH/2 && coordsBall[1] >= coordsBarre1[1]-(BARRE_HEIGHT/2+BALL_WIDTH/2) && coordsBall[1] <= coordsBarre1[1]+BARRE_HEIGHT/2) {
             this.paddle.start();
@@ -174,6 +213,7 @@ public class PongView extends View implements OnTouchListener {
             direction[1] = -1;
             ballVelocity *= 1.05F;
             ballSpeed *= ballVelocity;
+            hasBall = true;
         }
         else if(coordsBall[0] > coordsBarre2[0] - BARRE_WIDTH/2 && coordsBall[0] < coordsBarre2[0] + BARRE_WIDTH/2 && coordsBall[1] >= coordsBarre2[1]-(BARRE_HEIGHT/2+BALL_WIDTH/2) && coordsBall[1] <= coordsBarre2[1]+BARRE_HEIGHT/2) {
             this.paddle.start();
@@ -182,6 +222,7 @@ public class PongView extends View implements OnTouchListener {
             direction[1] = 1;
             ballVelocity *= 1.05F;
             ballSpeed *= ballVelocity;
+            hasBall = false;
         }
 
         invalidate();
