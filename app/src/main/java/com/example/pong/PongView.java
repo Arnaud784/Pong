@@ -114,7 +114,7 @@ public class PongView extends View implements OnTouchListener {
             initPong(canvas);
         }
 
-        if (hasBall == true){
+        if (hasBall){
             if (coordsBall[0] < coordsBarre2[0]){
                 int temp = coordsBarre2[0] - coordsBall[0];
                 if (temp >= 20){
