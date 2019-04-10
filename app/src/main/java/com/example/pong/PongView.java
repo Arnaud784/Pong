@@ -11,17 +11,19 @@ import android.view.View.OnTouchListener;
 public class PongView extends View implements OnTouchListener {
     Paint mpaint;
     int xBall, yBall, xDir, yDir, xBarre, yBarre;
-    int maxX = 1080;
-    int maxY = 1600;
+    int largeur;
+    int longueur;
 
-    public PongView(Context context) {
+    public PongView(Context context, int larg, int longu) {
         super(context);
         this.setOnTouchListener(this);
+        largeur = larg;
+        longueur = longu;
         mpaint = new Paint();
-        xBall = 200;
-        yBall = 500;
-        xBarre = 520;
-        yBarre = 1485;
+        xBall = largeur/2;
+        yBall = longueur/2;
+        xBarre = largeur/2;
+        yBarre = (longueur/10)*8;
         xDir = 10;
         yDir = 10;
     }
@@ -33,7 +35,7 @@ public class PongView extends View implements OnTouchListener {
         int y = (int) event.getY();
         xBarre = x;
 
-        switch (event.getAction()) {
+        /*switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 Log.i("TAG", "touched down: (" + x + ", " + y + ")");
                 break;
@@ -43,33 +45,35 @@ public class PongView extends View implements OnTouchListener {
             case MotionEvent.ACTION_UP:
                 Log.i("TAG", "touched up");
                 break;
-        }
+        }*/
 
-        return false;
+        invalidate();
+
+        return true;
     }
 
     @Override
     public void onDraw(Canvas canvas) {
         canvas.drawCircle(xBall, yBall, (float) 25.0, mpaint);
-        canvas.drawRect(xBarre - 100, 1470.0F, xBarre + 100, 1500.0F, mpaint);
+        canvas.drawRect(xBarre - 100, yBarre-15, xBarre + 100, yBarre+15, mpaint);
         moveBall();
     }
 
     public void moveBall() {
         xBall += xDir;
         yBall += yDir;
-        if(xBall >= maxX-25) {
-            xDir *= -1;
+        if(xBall >= largeur-25) {
+            xDir = -10;
         }
         else if(xBall <= 25) {
-            xDir *= -1;
+            xDir = 10;
         }
         else if(yBall <= 25) {
-            yDir *= -1;
+            yDir = 10;
         }
-        else if(yBall >= maxY-25) {
+        else if(yBall >= longueur-25) {
             Log.i("TAG", "perdu");
-            yDir *= -1;
+            yDir = -10;
         }
 
         else if(xBall > xBarre - 100 && xBall < xBarre + 100 && yBall >= yBarre-40 && yBall <= yBarre+15) {
