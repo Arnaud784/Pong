@@ -2,6 +2,7 @@ package com.example.pong;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -9,23 +10,44 @@ import android.view.View;
 import android.view.View.OnTouchListener;
 
 public class PongView extends View implements OnTouchListener {
-    Paint mpaint;
-    int xBall, yBall, xDir, yDir, xBarre, yBarre;
-    int largeur;
-    int longueur;
 
-    public PongView(Context context, int larg, int longu) {
+    Paint mpaint;
+
+    int score;
+    int canvasWidth;
+    int canvasHeight;
+    int ballSpeed;
+    int coordsBarre[] = {-100, -100};
+    int coordsBall[] = {-100, -100};
+    float direction[] = {1, 1};
+
+    boolean lastBounceIsBar;
+    boolean hasInit;
+
+    final int BARRE_WIDTH = 200;
+    final int BARRE_HEIGHT = 30;
+    final int BALL_WIDTH = 50;
+
+
+    public PongView(Context context) {
         super(context);
         this.setOnTouchListener(this);
-        largeur = larg;
-        longueur = longu;
         mpaint = new Paint();
-        xBall = largeur/2;
-        yBall = longueur/2;
-        xBarre = largeur/2;
-        yBarre = (longueur/10)*8;
-        xDir = 10;
-        yDir = 10;
+        canvasWidth = 0;
+        score = 0;
+        ballSpeed = 10;
+        lastBounceIsBar = false;
+        hasInit = false;
+    }
+
+    public void initPong(Canvas canvas) {
+        canvasWidth = canvas.getWidth();
+        canvasHeight = canvas.getHeight();
+        coordsBarre[0] = canvasWidth/2;
+        coordsBarre[1] = (canvasHeight/10)*9;
+        coordsBall[0] = canvasWidth/2;
+        coordsBall[1] = BALL_WIDTH/2;
+        hasInit = true;
     }
 
     @Override
@@ -33,53 +55,67 @@ public class PongView extends View implements OnTouchListener {
 
         int x = (int) event.getX();
         int y = (int) event.getY();
-        xBarre = x;
-
-        /*switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                Log.i("TAG", "touched down: (" + x + ", " + y + ")");
-                break;
-            case MotionEvent.ACTION_MOVE:
-                Log.i("TAG", "moving: (" + x + ", " + y + ")");
-                break;
-            case MotionEvent.ACTION_UP:
-                Log.i("TAG", "touched up");
-                break;
-        }*/
-
+        coordsBarre[0] = x;
+        if(coordsBarre[0]+BARRE_WIDTH/2 > canvasWidth) {
+            coordsBarre[0] = canvasWidth - BARRE_WIDTH/2;
+        }
+        else if(coordsBarre[0]-BARRE_WIDTH/2 < 0) {
+            coordsBarre[0] = BARRE_WIDTH/2;
+        }
         invalidate();
-
         return true;
     }
 
     @Override
     public void onDraw(Canvas canvas) {
-        canvas.drawCircle(xBall, yBall, (float) 25.0, mpaint);
-        canvas.drawRect(xBarre - 100, yBarre-15, xBarre + 100, yBarre+15, mpaint);
-        moveBall();
+        //Log.i("TAG", "test: " + canvas.getWidth() + " " + canvas.getHeight());
+
+        if(!hasInit) {
+            initPong(canvas);
+        }
+
+        canvas.drawCircle(coordsBall[0], coordsBall[1], (float) BALL_WIDTH/2, mpaint);
+        canvas.drawRect(coordsBarre[0] - BARRE_WIDTH/2, coordsBarre[1] - BARRE_HEIGHT/2, coordsBarre[0] + BARRE_WIDTH/2, coordsBarre[1] + BARRE_HEIGHT/2, mpaint);
+
+        mpaint.setColor(Color.BLACK);
+        mpaint.setTextSize(70);
+        canvas.drawText("Score : " + score, canvasWidth/2-130, canvasWidth/10, mpaint);
+
+        moveBall(canvas);
     }
 
-    public void moveBall() {
-        xBall += xDir;
-        yBall += yDir;
-        if(xBall >= largeur-25) {
-            xDir = -10;
-        }
-        else if(xBall <= 25) {
-            xDir = 10;
-        }
-        else if(yBall <= 25) {
-            yDir = 10;
-        }
-        else if(yBall >= longueur-25) {
-            Log.i("TAG", "perdu");
-            yDir = -10;
-        }
+    public void moveBall(Canvas canvas) {
 
-        else if(xBall > xBarre - 100 && xBall < xBarre + 100 && yBall >= yBarre-40 && yBall <= yBarre+15) {
-            yDir = -10;
-        }
+        coordsBall[0] += direction[0]*ballSpeed;
+        coordsBall[1] += direction[1]*ballSpeed;
 
+        if(coordsBall[0] >= canvasWidth-BALL_WIDTH/2) {
+            lastBounceIsBar = false;
+            direction[0] = -1;
+        }
+        else if(coordsBall[0] <= BALL_WIDTH/2) {
+            lastBounceIsBar = false;
+            direction[0] = 1;
+        }
+        else if(coordsBall[1] <= BALL_WIDTH/2) {
+            lastBounceIsBar = false;
+            direction[1] = 1;
+        }
+        else if(coordsBall[1] >= canvasHeight-BALL_WIDTH/2) {
+            score = 0;
+            lastBounceIsBar = false;
+            direction[1] = -1;
+            coordsBall[0] = canvasWidth/2;
+            coordsBall[1] = BALL_WIDTH/2;
+        }
+        else if(coordsBall[0] > coordsBarre[0] - BARRE_WIDTH/2 && coordsBall[0] < coordsBarre[0] + BARRE_WIDTH/2 && coordsBall[1] >= coordsBarre[1]-(BARRE_HEIGHT/2+BALL_WIDTH/2) && coordsBall[1] <= coordsBarre[1]+BARRE_HEIGHT/2) {
+            if(!lastBounceIsBar) {
+                score += 1;
+            }
+            lastBounceIsBar = true;
+            direction[1] = -1;
+        }
         invalidate();
+
     }
 }

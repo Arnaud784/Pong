@@ -11,9 +11,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        DisplayMetrics metrics = new DisplayMetrics();
+        /*DisplayMetrics metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
-        PongView pongview = new PongView(this, metrics.widthPixels, metrics.heightPixels);
+        PongView pongview = new PongView(this, metrics.widthPixels, metrics.heightPixels);*/
+        PongView pongview = new PongView(this);
 
         setContentView(pongview);
     }
