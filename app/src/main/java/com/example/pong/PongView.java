@@ -103,15 +103,6 @@ public class PongView extends View implements OnTouchListener {
                 coordsBarre1[0] = BARRE_WIDTH / 2;
             }
         }
-        else{
-            coordsBarre2[0] = x;
-            if (coordsBarre2[0] + BARRE_WIDTH / 2 > canvasWidth) {
-                coordsBarre2[0] = canvasWidth - BARRE_WIDTH / 2;
-            } else if (coordsBarre2[0] - BARRE_WIDTH / 2 < 0) {
-                coordsBarre2[0] = BARRE_WIDTH / 2;
-            }
-        }
-
         invalidate();
         return true;
     }
@@ -154,8 +145,8 @@ public class PongView extends View implements OnTouchListener {
         mpaint.setTextSize(70);
 
         canvas.rotate(-90);
-        canvas.drawText("" + score2, -(canvasHeight/2) + 50, 50, mpaint);
-        canvas.drawText("" + score1, -(canvasHeight/2) - 50, 50, mpaint);
+        canvas.drawText("" + score2, -(canvasHeight/2) + 50, 100, mpaint);
+        canvas.drawText("" + score1, -(canvasHeight/2) - 100, 100, mpaint);
         canvas.rotate(90);
         moveBall(canvas);
     }
