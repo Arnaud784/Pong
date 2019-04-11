@@ -43,12 +43,13 @@ public class Sound extends View{
         new Thread(new Runnable() {
             public void run() {
                 float log1=(float)(Math.log(2)/Math.log(20));
-                ambiant.setVolume(log1,log1);
-                ambiant.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                Sound soundy = new Sound(getContext());
+               soundy.ambiant.setVolume(log1,log1);
+               soundy.ambiant.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
 
                     @Override
                     public void onCompletion(MediaPlayer mp) {
-                        ambiant.start();
+                        new Sound(getContext()).ambiant.start();
                     }
 
                 });
