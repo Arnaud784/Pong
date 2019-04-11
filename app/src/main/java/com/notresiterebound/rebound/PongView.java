@@ -1,6 +1,7 @@
 package com.notresiterebound.rebound;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -172,11 +173,16 @@ public class PongView extends View implements OnTouchListener {
             direction[0] = -0.70711F;
             direction[1] = 0.70711F;
             score1++;
-            /*if (score1 == 10){
-                smsManager.sendTextMessage(phoneNumber, null, message, null, null);
+            if (score1 == 10){
+                Intent i = new Intent();
+                i.setAction(Intent.ACTION_SEND);
+                i.putExtra(Intent.EXTRA_SUBJECT, "Let's join the rebound game!");
+                i.putExtra(Intent.EXTRA_TEXT, "You win with : " + score1 + " points");
+                i.setType("text/plain");
+                getContext().startActivity(Intent.createChooser(i, "Send you're score !"));
                 score1 = 0;
                 score2 = 0;
-            }*/
+            }
             sound.mediaPlayerWall();
             coordsBall[0] = canvasWidth/2;
             coordsBall[1] = canvasHeight/2;
@@ -187,9 +193,16 @@ public class PongView extends View implements OnTouchListener {
             direction[0] = 0.70711F;
             direction[1] = -0.70711F;
             score2++;
-            /*if (score2 == 10){
-                smsManager.sendTextMessage(phoneNumber, null, message, null, null);
-            }*/
+            if (score2 == 10){
+                 Intent i = new Intent();
+                i.setAction(Intent.ACTION_SEND);
+                i.putExtra(Intent.EXTRA_SUBJECT, "Let's join the rebound game!");
+                i.putExtra(Intent.EXTRA_TEXT, "You win with : " + score1 + " points");
+                i.setType("text/plain");
+                getContext().startActivity(Intent.createChooser(i, "Send you're score !"));
+                score1 = 0;
+                score2 = 0;
+            }
             sound.mediaPlayerGoal();;
             coordsBall[0] = canvasWidth/2;
             coordsBall[1] = canvasHeight/2;
