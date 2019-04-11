@@ -19,21 +19,20 @@ public class PongView extends View implements OnTouchListener {
     int score2;
     int canvasWidth;
     int canvasHeight;
-    int ballSpeed;
-    float ballVelocity = 1.00F;
     int coordsBarre1[] = {-100, -100};
     int coordsBarre2[] = {-100, -100};
     int coordsBall[] = {-100, -100};
-    float direction[] = {1, 1};
+    float direction[] = {0, 1};
+    float ballSpeed;
 
     boolean hasBall = false;
 
-    boolean lastBounceIsBar;
     boolean hasInit;
 
     final int BARRE_WIDTH = 200;
     final int BARRE_HEIGHT = 30;
     final int BALL_WIDTH = 50;
+    final int MAX_BOUNCE_ANGLE = 75;
 
     final MediaPlayer wall = MediaPlayer.create(getContext(), R.raw.wallbounce);
     final MediaPlayer paddle = MediaPlayer.create(getContext(), R.raw.bouncepaddle);
@@ -69,8 +68,7 @@ public class PongView extends View implements OnTouchListener {
         mpaint = new Paint();
         canvasWidth = 0;
         score1 = 0;
-        ballSpeed = 10;
-        lastBounceIsBar = false;
+        ballSpeed = 15.0F;
         hasInit = false;
 
     }
@@ -133,6 +131,13 @@ public class PongView extends View implements OnTouchListener {
                     coordsBarre2[0] += temp;
                 }
             }
+
+            if(coordsBarre2[0]+BARRE_WIDTH/2 > canvasWidth) {
+                coordsBarre2[0] = canvasWidth - BARRE_WIDTH/2;
+            }
+            else if(coordsBarre2[0]-BARRE_WIDTH/2 < 0) {
+                coordsBarre2[0] = BARRE_WIDTH/2;
+            }
         }
 
         canvas.drawCircle(coordsBall[0], coordsBall[1], (float) BALL_WIDTH/2, mpaint);
@@ -157,19 +162,17 @@ public class PongView extends View implements OnTouchListener {
         coordsBall[1] += direction[1]*ballSpeed;
 
         if(coordsBall[0] >= canvasWidth-BALL_WIDTH/2) {
-            lastBounceIsBar = false;
-            direction[0] = -1;
+            direction[0] = -Math.abs(direction[0]);
             this.wall.start();
 
         }
         else if(coordsBall[0] <= BALL_WIDTH/2) {
-            lastBounceIsBar = false;
-            direction[0] = 1;
+            direction[0] = Math.abs(direction[0]);
             this.wall.start();
         }
         else if(coordsBall[1] <= BALL_WIDTH/2) {
-            lastBounceIsBar = false;
-            direction[1] = 1;
+            direction[0] = -0.70711F;
+            direction[1] = 0.70711F;
             score1++;
             if (score1 == 10){
                 smsManager.sendTextMessage(phoneNumber, null, message, null, null);
@@ -179,13 +182,12 @@ public class PongView extends View implements OnTouchListener {
             this.goal.start();
             coordsBall[0] = canvasWidth/2;
             coordsBall[1] = canvasHeight/2;
-            ballVelocity = 1.00F;
             ballSpeed = 10;
             hasBall = false;
         }
         else if(coordsBall[1] >= canvasHeight - BALL_WIDTH/2) {
-            lastBounceIsBar = false;
-            direction[1] = -1;
+            direction[0] = 0.70711F;
+            direction[1] = -0.70711F;
             score2++;
             if (score2 == 10){
                 smsManager.sendTextMessage(phoneNumber, null, message, null, null);
@@ -193,26 +195,33 @@ public class PongView extends View implements OnTouchListener {
             this.goal.start();
             coordsBall[0] = canvasWidth/2;
             coordsBall[1] = canvasHeight/2;
-            ballVelocity = 1.00F;
             ballSpeed = 10;
             hasBall = true;
         }
         else if(coordsBall[0] > coordsBarre1[0] - BARRE_WIDTH/2 && coordsBall[0] < coordsBarre1[0] + BARRE_WIDTH/2 && coordsBall[1] >= coordsBarre1[1]-(BARRE_HEIGHT/2+BALL_WIDTH/2) && coordsBall[1] <= coordsBarre1[1]+BARRE_HEIGHT/2) {
             this.paddle.start();
             this.vib.vibrate(100);
-            lastBounceIsBar = true;
-            direction[1] = -1;
-            ballVelocity *= 1.05F;
-            ballSpeed *= ballVelocity;
+
+            float relativeIntersectX = coordsBarre1[0]-coordsBall[0];
+            float normalizedRelativeIntersectionX = relativeIntersectX/(BARRE_WIDTH/2);
+            float bounceAngle =normalizedRelativeIntersectionX * MAX_BOUNCE_ANGLE;
+            direction[0] = (float)(Math.sin(bounceAngle*(Math.PI/180))*(-1));
+            direction[1] = (float)(Math.cos(bounceAngle*(Math.PI/180))*(-1));
+
+            ballSpeed *= 1.1F;
             hasBall = true;
         }
         else if(coordsBall[0] > coordsBarre2[0] - BARRE_WIDTH/2 && coordsBall[0] < coordsBarre2[0] + BARRE_WIDTH/2 && coordsBall[1] >= coordsBarre2[1]-(BARRE_HEIGHT/2+BALL_WIDTH/2) && coordsBall[1] <= coordsBarre2[1]+BARRE_HEIGHT/2) {
             this.paddle.start();
             this.vib.vibrate(100);
-            lastBounceIsBar = true;
-            direction[1] = 1;
-            ballVelocity *= 1.05F;
-            ballSpeed *= ballVelocity;
+
+            float relativeIntersectX = coordsBarre2[0]-coordsBall[0];
+            float normalizedRelativeIntersectionX = relativeIntersectX/(BARRE_WIDTH/2);
+            float bounceAngle =normalizedRelativeIntersectionX * MAX_BOUNCE_ANGLE;
+            direction[0] = (float)(Math.sin(bounceAngle*(Math.PI/180))*(-1));
+            direction[1] = (float)(Math.cos(bounceAngle*(Math.PI/180)));
+
+            ballSpeed *= 1.1F;
             hasBall = false;
         }
 
