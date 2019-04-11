@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 
 public class MenuActivity extends AppCompatActivity {
@@ -17,8 +19,10 @@ public class MenuActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_menu);
 
+
         start = (Button)findViewById(R.id.start);
         help = (Button)findViewById(R.id.help);
+
 
         start.setOnClickListener(new View.OnClickListener() {
             @Override

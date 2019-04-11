@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.media.MediaPlayer;
 import android.os.Vibrator;
 import android.telephony.SmsManager;
 import android.view.MotionEvent;
@@ -49,7 +50,17 @@ public class PongView extends View implements OnTouchListener {
         super(context);
         this.setOnTouchListener(this);
 
-        sound.mediaPlayerAmbiant();
+
+        float log1=(float)(Math.log(2)/Math.log(20));
+        sound.ambiant.setVolume(log1,log1);
+        sound.ambiant.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                new Sound(getContext()).ambiant.start();
+            }
+
+        });
 
         mpaint = new Paint();
         canvasWidth = 0;
@@ -71,6 +82,8 @@ public class PongView extends View implements OnTouchListener {
         coordsBall[0] = canvasWidth/2;
         coordsBall[1] = canvasHeight/2;
         hasInit = true;
+
+        sound.ambiant.start();
     }
 
     @Override
