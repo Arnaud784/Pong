@@ -34,10 +34,8 @@ public class PongView extends View implements OnTouchListener {
     final int BALL_WIDTH = 50;
     final int MAX_BOUNCE_ANGLE = 75;
 
-    final MediaPlayer wall = MediaPlayer.create(getContext(), R.raw.wallbounce);
-    final MediaPlayer paddle = MediaPlayer.create(getContext(), R.raw.bouncepaddle);
-    final MediaPlayer goal = MediaPlayer.create(getContext(), R.raw.goal);
-    final MediaPlayer ambiant = MediaPlayer.create(getContext(), R.raw.ambiant);
+
+    Sound sound = new Sound(getContext());
 
 
     String phoneNumber = "+33647405534";
@@ -53,17 +51,7 @@ public class PongView extends View implements OnTouchListener {
         super(context);
         this.setOnTouchListener(this);
 
-        float log1=(float)(Math.log(2)/Math.log(20));
-        ambiant.setVolume(log1,log1);
-        ambiant.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-
-            @Override
-            public void onCompletion(MediaPlayer mp) {
-                ambiant.start();
-            }
-
-        });
-
+        sound.mediaPlayerAmbiant();
 
         mpaint = new Paint();
         canvasWidth = 0;
@@ -85,7 +73,6 @@ public class PongView extends View implements OnTouchListener {
         coordsBall[0] = canvasWidth/2;
         coordsBall[1] = canvasHeight/2;
         hasInit = true;
-        ambiant.start();
     }
 
     @Override
@@ -163,12 +150,12 @@ public class PongView extends View implements OnTouchListener {
 
         if(coordsBall[0] >= canvasWidth-BALL_WIDTH/2) {
             direction[0] = -Math.abs(direction[0]);
-            this.wall.start();
+            sound.mediaPlayerWall();
 
         }
         else if(coordsBall[0] <= BALL_WIDTH/2) {
             direction[0] = Math.abs(direction[0]);
-            this.wall.start();
+            sound.mediaPlayerWall();
         }
         else if(coordsBall[1] <= BALL_WIDTH/2) {
             direction[0] = -0.70711F;
@@ -179,7 +166,7 @@ public class PongView extends View implements OnTouchListener {
                 score1 = 0;
                 score2 = 0;
             }
-            this.goal.start();
+            sound.mediaPlayerWall();
             coordsBall[0] = canvasWidth/2;
             coordsBall[1] = canvasHeight/2;
             ballSpeed = 10;
@@ -192,14 +179,14 @@ public class PongView extends View implements OnTouchListener {
             if (score2 == 10){
                 smsManager.sendTextMessage(phoneNumber, null, message, null, null);
             }
-            this.goal.start();
+            sound.mediaPlayerGoal();;
             coordsBall[0] = canvasWidth/2;
             coordsBall[1] = canvasHeight/2;
             ballSpeed = 10;
             hasBall = true;
         }
         else if(coordsBall[0] > coordsBarre1[0] - BARRE_WIDTH/2 && coordsBall[0] < coordsBarre1[0] + BARRE_WIDTH/2 && coordsBall[1] >= coordsBarre1[1]-(BARRE_HEIGHT/2+BALL_WIDTH/2) && coordsBall[1] <= coordsBarre1[1]+BARRE_HEIGHT/2) {
-            this.paddle.start();
+            sound.mediaPlayerPaddle();
             this.vib.vibrate(100);
 
             float relativeIntersectX = coordsBarre1[0]-coordsBall[0];
@@ -212,9 +199,8 @@ public class PongView extends View implements OnTouchListener {
             hasBall = true;
         }
         else if(coordsBall[0] > coordsBarre2[0] - BARRE_WIDTH/2 && coordsBall[0] < coordsBarre2[0] + BARRE_WIDTH/2 && coordsBall[1] >= coordsBarre2[1]-(BARRE_HEIGHT/2+BALL_WIDTH/2) && coordsBall[1] <= coordsBarre2[1]+BARRE_HEIGHT/2) {
-            this.paddle.start();
             this.vib.vibrate(100);
-
+            sound.mediaPlayerPaddle();
             float relativeIntersectX = coordsBarre2[0]-coordsBall[0];
             float normalizedRelativeIntersectionX = relativeIntersectX/(BARRE_WIDTH/2);
             float bounceAngle =normalizedRelativeIntersectionX * MAX_BOUNCE_ANGLE;
