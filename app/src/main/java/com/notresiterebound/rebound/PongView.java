@@ -2,6 +2,8 @@ package com.notresiterebound.rebound;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -30,10 +32,14 @@ public class PongView extends View implements OnTouchListener {
 
     boolean hasInit;
 
+    Bitmap myballbitmap;
+    Bitmap mypaddlebitmap;
+
     final int BARRE_WIDTH = 200;
     final int BARRE_HEIGHT = 30;
     final int BALL_WIDTH = 50;
     final int MAX_BOUNCE_ANGLE = 75;
+    final float INITIAL_BALL_SPEED = 15;
 
 
     Sound sound = new Sound(getContext());
@@ -63,10 +69,14 @@ public class PongView extends View implements OnTouchListener {
 
         });
 
+        setBackgroundResource(R.drawable.galaxie2);
+        myballbitmap = BitmapFactory.decodeResource(getResources(), R.drawable.alien1);
+        mypaddlebitmap = BitmapFactory.decodeResource(getResources(), R.drawable.soucoupe);
+
         mpaint = new Paint();
         canvasWidth = 0;
         score1 = 0;
-        ballSpeed = 15.0F;
+        ballSpeed = INITIAL_BALL_SPEED;
         hasInit = false;
 
     }
@@ -139,18 +149,22 @@ public class PongView extends View implements OnTouchListener {
             }
         }
 
-        canvas.drawCircle(coordsBall[0], coordsBall[1], (float) BALL_WIDTH/2, mpaint);
+        //canvas.drawCircle(coordsBall[0], coordsBall[1], (float) BALL_WIDTH/2, mpaint);
+        mpaint.setColor(Color.WHITE);
         canvas.drawLine((float)(0), (float)(canvasHeight/2), (float)(canvasWidth), (float)(canvasHeight/2), mpaint);
-        canvas.drawRect(coordsBarre1[0] - BARRE_WIDTH/2, coordsBarre1[1] - BARRE_HEIGHT/2, coordsBarre1[0] + BARRE_WIDTH/2, coordsBarre1[1] + BARRE_HEIGHT/2, mpaint);
-        canvas.drawRect(coordsBarre2[0] - BARRE_WIDTH/2, coordsBarre2[1] - BARRE_HEIGHT/2, coordsBarre2[0] + BARRE_WIDTH/2, coordsBarre2[1] + BARRE_HEIGHT/2, mpaint);
+        //canvas.drawRect(coordsBarre1[0] - BARRE_WIDTH/2, coordsBarre1[1] - BARRE_HEIGHT/2, coordsBarre1[0] + BARRE_WIDTH/2, coordsBarre1[1] + BARRE_HEIGHT/2, mpaint);
+        //canvas.drawRect(coordsBarre2[0] - BARRE_WIDTH/2, coordsBarre2[1] - BARRE_HEIGHT/2, coordsBarre2[0] + BARRE_WIDTH/2, coordsBarre2[1] + BARRE_HEIGHT/2, mpaint);
 
+        canvas.drawBitmap(myballbitmap, coordsBall[0]-BALL_WIDTH/2, coordsBall[1]-BALL_WIDTH/2,mpaint);
+        canvas.drawBitmap(mypaddlebitmap, coordsBarre1[0]-BARRE_WIDTH/2, coordsBarre1[1]-BARRE_HEIGHT, mpaint);
+        canvas.drawBitmap(mypaddlebitmap, coordsBarre2[0]-BARRE_WIDTH/2, coordsBarre2[1]-BARRE_HEIGHT, mpaint);
 
-        mpaint.setColor(Color.BLACK);
+        //mpaint.setColor(Color.BLACK);
         mpaint.setTextSize(70);
 
         canvas.rotate(-90);
-        canvas.drawText("" + score2, -(canvasHeight/2) + 50, 100, mpaint);
-        canvas.drawText("" + score1, -(canvasHeight/2) - 100, 100, mpaint);
+        canvas.drawText("" + score2, -(canvasHeight/2) + 50, 150, mpaint);
+        canvas.drawText("" + score1, -(canvasHeight/2) - 100, 150, mpaint);
         canvas.rotate(90);
         moveBall(canvas);
     }
@@ -186,7 +200,7 @@ public class PongView extends View implements OnTouchListener {
             sound.mediaPlayerWall();
             coordsBall[0] = canvasWidth/2;
             coordsBall[1] = canvasHeight/2;
-            ballSpeed = 10;
+            ballSpeed = INITIAL_BALL_SPEED;
             hasBall = false;
         }
         else if(coordsBall[1] >= canvasHeight - BALL_WIDTH/2) {
@@ -206,7 +220,7 @@ public class PongView extends View implements OnTouchListener {
             sound.mediaPlayerGoal();;
             coordsBall[0] = canvasWidth/2;
             coordsBall[1] = canvasHeight/2;
-            ballSpeed = 10;
+            ballSpeed = INITIAL_BALL_SPEED;
             hasBall = true;
         }
         else if(coordsBall[0] > coordsBarre1[0] - BARRE_WIDTH/2 && coordsBall[0] < coordsBarre1[0] + BARRE_WIDTH/2 && coordsBall[1] >= coordsBarre1[1]-(BARRE_HEIGHT/2+BALL_WIDTH/2) && coordsBall[1] <= coordsBarre1[1]+BARRE_HEIGHT/2) {
